@@ -1,12 +1,170 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from 'react';
+import Header from '@/components/Header';
+import URLInput from '@/components/URLInput';
+import PerformanceMetrics from '@/components/PerformanceMetrics';
+import SecurityAnalysis from '@/components/SecurityAnalysis';
+import GlobalMap from '@/components/GlobalMap';
+
+// Dados simulados para demonstração
+const generateMockData = (url: string) => {
+  const locations = [
+    { city: 'São Paulo', country: 'Brasil', region: 'SA', coords: { lat: -23.5505, lng: -46.6333 } },
+    { city: 'Nova York', country: 'EUA', region: 'NA', coords: { lat: 40.7128, lng: -74.0060 } },
+    { city: 'Londres', country: 'Reino Unido', region: 'EU', coords: { lat: 51.5074, lng: -0.1278 } },
+    { city: 'Tóquio', country: 'Japão', region: 'AS', coords: { lat: 35.6762, lng: 139.6503 } },
+    { city: 'Sydney', country: 'Austrália', region: 'OC', coords: { lat: -33.8688, lng: 151.2093 } },
+    { city: 'Mumbai', country: 'Índia', region: 'AS', coords: { lat: 19.0760, lng: 72.8777 } },
+  ];
+
+  const getRandomLoadTime = () => (Math.random() * 4 + 0.5).toFixed(1);
+  const getStatus = (time: number) => {
+    if (time < 1) return 'excellent';
+    if (time < 2) return 'good';
+    if (time < 4) return 'average';
+    return 'poor';
+  };
+
+  const locationData = locations.map(loc => {
+    const loadTime = parseFloat(getRandomLoadTime());
+    return {
+      ...loc,
+      loadTime,
+      status: getStatus(loadTime) as 'excellent' | 'good' | 'average' | 'poor',
+    };
+  });
+
+  const avgLoadTime = locationData.reduce((acc, loc) => acc + loc.loadTime, 0) / locationData.length;
+  const performanceScore = Math.max(0, Math.round(100 - (avgLoadTime * 20)));
+
+  return {
+    performance: {
+      loadTime: parseFloat(avgLoadTime.toFixed(1)),
+      pageSize: Math.floor(Math.random() * 3000000) + 500000,
+      requests: Math.floor(Math.random() * 80) + 20,
+      performanceScore,
+    },
+    security: {
+      overall: performanceScore > 80 ? 'excellent' : performanceScore > 60 ? 'good' : performanceScore > 40 ? 'warning' : 'critical' as 'excellent' | 'good' | 'warning' | 'critical',
+      https: Math.random() > 0.2,
+      headers: {
+        hsts: Math.random() > 0.3,
+        csp: Math.random() > 0.4,
+        xframe: Math.random() > 0.3,
+        xss: Math.random() > 0.2,
+      },
+      issues: [
+        {
+          type: 'warning' as const,
+          title: 'Content Security Policy ausente',
+          description: 'O header CSP ajuda a prevenir ataques XSS e injeção de código.',
+        },
+        {
+          type: 'info' as const,
+          title: 'Certificado SSL válido',
+          description: 'O site utiliza HTTPS com certificado válido.',
+        },
+      ],
+    },
+    locations: locationData,
+  };
+};
 
 const Index = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [analysisData, setAnalysisData] = useState<any>(null);
+  const [analyzedUrl, setAnalyzedUrl] = useState('');
+
+  const handleAnalyze = async (url: string) => {
+    setIsLoading(true);
+    setAnalyzedUrl(url);
+    
+    // Simula tempo de análise
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    const mockData = generateMockData(url);
+    setAnalysisData(mockData);
+    setIsLoading(false);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      
+      <main className="container mx-auto px-4 py-8">
+        <div className="space-y-8">
+          <URLInput onAnalyze={handleAnalyze} isLoading={isLoading} />
+          
+          {isLoading && (
+            <div className="text-center py-12">
+              <div className="inline-block w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+              <h3 className="text-xl font-semibold text-gray-700">Analisando {analyzedUrl}</h3>
+              <p className="text-gray-600 mt-2">
+                Executando testes de performance e segurança em múltiplas localizações...
+              </p>
+              <div className="flex justify-center mt-4 space-x-2">
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              </div>
+            </div>
+          )}
+          
+          {analysisData && !isLoading && (
+            <div className="space-y-8">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Relatório de Análise: {analyzedUrl}
+                </h2>
+                <p className="text-gray-600">
+                  Análise completa finalizada em {new Date().toLocaleString('pt-BR')}
+                </p>
+              </div>
+              
+              <PerformanceMetrics data={analysisData.performance} />
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <SecurityAnalysis data={analysisData.security} />
+                <GlobalMap data={analysisData.locations} />
+              </div>
+              
+              <div className="text-center py-8 bg-white rounded-lg card-shadow">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Quer analisar outro site?
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Insira uma nova URL acima para iniciar uma nova análise.
+                </p>
+              </div>
+            </div>
+          )}
+          
+          {!analysisData && !isLoading && (
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <div className="w-24 h-24 mx-auto mb-6 gradient-bg rounded-full flex items-center justify-center">
+                  <Shield className="w-12 h-12 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  Pronto para começar!
+                </h3>
+                <p className="text-gray-600">
+                  Insira a URL do site que você deseja analisar no formulário acima. 
+                  Nossa ferramenta irá testar a performance e segurança em múltiplas localizações globais.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+      
+      <footer className="bg-gray-800 text-white py-8 mt-16">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-gray-300">
+            © 2024 WebSec Analyzer - Análise profissional de performance e segurança web
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
