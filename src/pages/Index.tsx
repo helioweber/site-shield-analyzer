@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Shield } from 'lucide-react';
 import Header from '@/components/Header';
@@ -125,7 +124,7 @@ const Index = () => {
               <PerformanceMetrics data={analysisData.performance} />
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <SecurityAnalysis data={analysisData.security} />
+                <SecurityAnalysis data={analysisData.security} url={analyzedUrl} />
                 <GlobalMap data={analysisData.locations} />
               </div>
               

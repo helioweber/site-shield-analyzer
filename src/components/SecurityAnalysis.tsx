@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, ShieldCheck, AlertTriangle, ShieldOff } from 'lucide-react';
+import VulnerabilityTester from './VulnerabilityTester';
 
 interface SecurityIssue {
   type: 'critical' | 'warning' | 'info' | 'success';
@@ -22,9 +23,10 @@ interface SecurityData {
 
 interface SecurityAnalysisProps {
   data: SecurityData;
+  url?: string;
 }
 
-const SecurityAnalysis = ({ data }: SecurityAnalysisProps) => {
+const SecurityAnalysis = ({ data, url }: SecurityAnalysisProps) => {
   const getSecurityIcon = (level: string) => {
     switch (level) {
       case 'excellent': return <ShieldCheck className="w-5 h-5 text-green-600" />;
@@ -147,6 +149,9 @@ const SecurityAnalysis = ({ data }: SecurityAnalysisProps) => {
           )}
         </CardContent>
       </Card>
+
+      {/* Novo componente de teste de vulnerabilidades */}
+      {url && <VulnerabilityTester url={url} />}
     </div>
   );
 };
