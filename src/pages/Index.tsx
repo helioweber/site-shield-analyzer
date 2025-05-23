@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { Shield } from 'lucide-react';
 import Header from '@/components/Header';
 import URLInput from '@/components/URLInput';
 import PerformanceMetrics from '@/components/PerformanceMetrics';

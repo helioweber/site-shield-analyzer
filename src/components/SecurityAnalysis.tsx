@@ -1,7 +1,6 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, ShieldCheck, Warning, ShieldOff } from 'lucide-react';
+import { Shield, ShieldCheck, AlertTriangle, ShieldOff } from 'lucide-react';
 
 interface SecurityIssue {
   type: 'critical' | 'warning' | 'info' | 'success';
@@ -30,7 +29,7 @@ const SecurityAnalysis = ({ data }: SecurityAnalysisProps) => {
     switch (level) {
       case 'excellent': return <ShieldCheck className="w-5 h-5 text-green-600" />;
       case 'good': return <Shield className="w-5 h-5 text-blue-600" />;
-      case 'warning': return <Warning className="w-5 h-5 text-yellow-600" />;
+      case 'warning': return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
       case 'critical': return <ShieldOff className="w-5 h-5 text-red-600" />;
       default: return <Shield className="w-5 h-5" />;
     }
@@ -93,7 +92,7 @@ const SecurityAnalysis = ({ data }: SecurityAnalysisProps) => {
                   {data.headers.hsts ? (
                     <ShieldCheck className="w-3 h-3 text-green-600" />
                   ) : (
-                    <Warning className="w-3 h-3 text-red-600" />
+                    <AlertTriangle className="w-3 h-3 text-red-600" />
                   )}
                   <span className="text-xs">HSTS</span>
                 </div>
@@ -101,7 +100,7 @@ const SecurityAnalysis = ({ data }: SecurityAnalysisProps) => {
                   {data.headers.csp ? (
                     <ShieldCheck className="w-3 h-3 text-green-600" />
                   ) : (
-                    <Warning className="w-3 h-3 text-red-600" />
+                    <AlertTriangle className="w-3 h-3 text-red-600" />
                   )}
                   <span className="text-xs">CSP</span>
                 </div>
@@ -109,7 +108,7 @@ const SecurityAnalysis = ({ data }: SecurityAnalysisProps) => {
                   {data.headers.xframe ? (
                     <ShieldCheck className="w-3 h-3 text-green-600" />
                   ) : (
-                    <Warning className="w-3 h-3 text-red-600" />
+                    <AlertTriangle className="w-3 h-3 text-red-600" />
                   )}
                   <span className="text-xs">X-Frame</span>
                 </div>
@@ -117,7 +116,7 @@ const SecurityAnalysis = ({ data }: SecurityAnalysisProps) => {
                   {data.headers.xss ? (
                     <ShieldCheck className="w-3 h-3 text-green-600" />
                   ) : (
-                    <Warning className="w-3 h-3 text-red-600" />
+                    <AlertTriangle className="w-3 h-3 text-red-600" />
                   )}
                   <span className="text-xs">XSS Protection</span>
                 </div>
