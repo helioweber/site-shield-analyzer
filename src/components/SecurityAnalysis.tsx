@@ -4,6 +4,7 @@ import { Shield, ShieldCheck, AlertTriangle, ShieldOff } from 'lucide-react';
 import VulnerabilityTester from './VulnerabilityTester';
 import SecurityBestPractices from './SecurityBestPractices';
 import PerformanceRecommendations from './PerformanceRecommendations';
+import SecurityRecommendations from './SecurityRecommendations';
 
 interface SecurityIssue {
   type: 'critical' | 'warning' | 'info' | 'success';
@@ -153,6 +154,9 @@ const SecurityAnalysis = ({ data, url }: SecurityAnalysisProps) => {
         </CardContent>
       </Card>
 
+      {/* Recomendações de segurança personalizadas */}
+      {url && <SecurityRecommendations data={data} url={url} />}
+      
       {/* Teste de vulnerabilidades */}
       {url && <VulnerabilityTester url={url} />}
       
