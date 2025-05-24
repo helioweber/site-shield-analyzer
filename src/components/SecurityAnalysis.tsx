@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Shield, ShieldCheck, AlertTriangle, ShieldOff } from 'lucide-react';
 import VulnerabilityTester from './VulnerabilityTester';
 import SecurityBestPractices from './SecurityBestPractices';
+import PerformanceRecommendations from './PerformanceRecommendations';
 
 interface SecurityIssue {
   type: 'critical' | 'warning' | 'info' | 'success';
@@ -155,7 +156,10 @@ const SecurityAnalysis = ({ data, url }: SecurityAnalysisProps) => {
       {/* Teste de vulnerabilidades */}
       {url && <VulnerabilityTester url={url} />}
       
-      {/* Novo componente de boas práticas */}
+      {/* Análise de Performance com IA */}
+      {url && <PerformanceRecommendations url={url} />}
+      
+      {/* Boas práticas de segurança */}
       {url && <SecurityBestPractices url={url} />}
     </div>
   );
