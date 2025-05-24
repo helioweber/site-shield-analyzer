@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, ShieldCheck, AlertTriangle, ShieldOff } from 'lucide-react';
 import VulnerabilityTester from './VulnerabilityTester';
+import SecurityBestPractices from './SecurityBestPractices';
 
 interface SecurityIssue {
   type: 'critical' | 'warning' | 'info' | 'success';
@@ -58,6 +59,7 @@ const SecurityAnalysis = ({ data, url }: SecurityAnalysisProps) => {
 
   return (
     <div className="space-y-6">
+      {/* Análise de Segurança existente */}
       <Card className="card-shadow">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -150,8 +152,11 @@ const SecurityAnalysis = ({ data, url }: SecurityAnalysisProps) => {
         </CardContent>
       </Card>
 
-      {/* Novo componente de teste de vulnerabilidades */}
+      {/* Teste de vulnerabilidades */}
       {url && <VulnerabilityTester url={url} />}
+      
+      {/* Novo componente de boas práticas */}
+      {url && <SecurityBestPractices url={url} />}
     </div>
   );
 };

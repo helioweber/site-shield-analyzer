@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Shield } from 'lucide-react';
 import Header from '@/components/Header';
@@ -6,15 +7,30 @@ import PerformanceMetrics from '@/components/PerformanceMetrics';
 import SecurityAnalysis from '@/components/SecurityAnalysis';
 import GlobalMap from '@/components/GlobalMap';
 
-// Dados simulados para demonstração
+// Dados simulados para demonstração com localizações do WebPageTest.org
 const generateMockData = (url: string) => {
   const locations = [
+    // Américas
+    { city: 'Dulles, VA', country: 'EUA', region: 'NA', coords: { lat: 38.9445, lng: -77.4558 } },
     { city: 'São Paulo', country: 'Brasil', region: 'SA', coords: { lat: -23.5505, lng: -46.6333 } },
-    { city: 'Nova York', country: 'EUA', region: 'NA', coords: { lat: 40.7128, lng: -74.0060 } },
+    { city: 'Toronto', country: 'Canadá', region: 'NA', coords: { lat: 43.6532, lng: -79.3832 } },
+    { city: 'Los Angeles', country: 'EUA', region: 'NA', coords: { lat: 34.0522, lng: -118.2437 } },
+    { city: 'Miami', country: 'EUA', region: 'NA', coords: { lat: 25.7617, lng: -80.1918 } },
+    
+    // Europa
     { city: 'Londres', country: 'Reino Unido', region: 'EU', coords: { lat: 51.5074, lng: -0.1278 } },
+    { city: 'Frankfurt', country: 'Alemanha', region: 'EU', coords: { lat: 50.1109, lng: 8.6821 } },
+    { city: 'Paris', country: 'França', region: 'EU', coords: { lat: 48.8566, lng: 2.3522 } },
+    { city: 'Amsterdam', country: 'Holanda', region: 'EU', coords: { lat: 52.3676, lng: 4.9041 } },
+    { city: 'Estocolmo', country: 'Suécia', region: 'EU', coords: { lat: 59.3293, lng: 18.0686 } },
+    
+    // Ásia-Pacífico
     { city: 'Tóquio', country: 'Japão', region: 'AS', coords: { lat: 35.6762, lng: 139.6503 } },
     { city: 'Sydney', country: 'Austrália', region: 'OC', coords: { lat: -33.8688, lng: 151.2093 } },
+    { city: 'Singapura', country: 'Singapura', region: 'AS', coords: { lat: 1.3521, lng: 103.8198 } },
     { city: 'Mumbai', country: 'Índia', region: 'AS', coords: { lat: 19.0760, lng: 72.8777 } },
+    { city: 'Hong Kong', country: 'China', region: 'AS', coords: { lat: 22.3193, lng: 114.1694 } },
+    { city: 'Seul', country: 'Coreia do Sul', region: 'AS', coords: { lat: 37.5665, lng: 126.9780 } },
   ];
 
   const getRandomLoadTime = () => (Math.random() * 4 + 0.5).toFixed(1);
