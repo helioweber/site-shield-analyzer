@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Shield } from 'lucide-react';
 import Header from '@/components/Header';
@@ -6,6 +5,7 @@ import URLInput from '@/components/URLInput';
 import PerformanceMetrics from '@/components/PerformanceMetrics';
 import SecurityAnalysis from '@/components/SecurityAnalysis';
 import GlobalMap from '@/components/GlobalMap';
+import PDFExporter from '@/components/PDFExporter';
 
 // Dados simulados para demonstração com localizações do WebPageTest.org
 const generateMockData = (url: string) => {
@@ -132,9 +132,14 @@ const Index = () => {
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">
                   Relatório de Análise: {analyzedUrl}
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-gray-600 mb-4">
                   Análise completa finalizada em {new Date().toLocaleString('pt-BR')}
                 </p>
+                
+                {/* Botão de exportação PDF */}
+                <div className="flex justify-center mb-6">
+                  <PDFExporter analysisData={analysisData} url={analyzedUrl} />
+                </div>
               </div>
               
               <PerformanceMetrics data={analysisData.performance} />
