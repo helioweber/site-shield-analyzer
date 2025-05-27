@@ -10,7 +10,7 @@ const Header = () => {
             <Shield className="w-8 h-8" />
             <Globe className="w-8 h-8" />
           </div>
-          <h1 className="text-4xl font-bold">WebSec Analyzer</h1>
+          <h1 className="text-4xl font-bold">Web Weber Scan</h1>
         </div>
         <p className="text-center text-xl opacity-90 max-w-2xl mx-auto">
           Análise completa de performance e segurança de websites com testes globais em tempo real
