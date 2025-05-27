@@ -6,6 +6,8 @@ import PerformanceMetrics from '@/components/PerformanceMetrics';
 import SecurityAnalysis from '@/components/SecurityAnalysis';
 import GlobalMap from '@/components/GlobalMap';
 import PDFExporter from '@/components/PDFExporter';
+import VulnerabilityTester from '@/components/VulnerabilityTester';
+import PerformanceRecommendations from '@/components/PerformanceRecommendations';
 
 // Dados simulados para demonstração com localizações do WebPageTest.org
 const generateMockData = (url: string) => {
@@ -147,6 +149,12 @@ const Index = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <SecurityAnalysis data={analysisData.security} url={analyzedUrl} />
                 <GlobalMap data={analysisData.locations} />
+              </div>
+
+              {/* Componentes de análise avançada */}
+              <div className="space-y-8">
+                <VulnerabilityTester url={analyzedUrl} />
+                <PerformanceRecommendations url={analyzedUrl} />
               </div>
               
               <div className="text-center py-8 bg-white rounded-lg card-shadow">

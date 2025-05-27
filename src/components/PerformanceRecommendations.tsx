@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -18,6 +17,7 @@ import {
   Info
 } from 'lucide-react';
 import { useState } from 'react';
+import { CDNAnalyzer } from '@/services/cdnAnalyzer';
 
 interface PerformanceAnalysis {
   score: number;
@@ -29,6 +29,12 @@ interface PerformanceAnalysis {
   cdn: {
     isUsing: boolean;
     provider: string | null;
+    details: {
+      detected: boolean;
+      cdn_name: string | null;
+      cdn_domains: string[];
+      analysis_method: string;
+    };
     recommendations: string[];
   };
   images: {
@@ -60,7 +66,10 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
   const [analysis, setAnalysis] = useState<PerformanceAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const generateMockAnalysis = (): PerformanceAnalysis => {
+  const generateMockAnalysis = async (url: string): Promise<PerformanceAnalysis> => {
+    // Análise real de CDN usando o serviço
+    const cdnAnalysis = await CDNAnalyzer.analyzeCDN(url);
+    
     return {
       score: Math.floor(Math.random() * 40) + 45, // 45-85
       cacheRules: {
@@ -74,13 +83,20 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
         ]
       },
       cdn: {
-        isUsing: Math.random() > 0.6,
-        provider: Math.random() > 0.5 ? 'CloudFlare' : null,
-        recommendations: [
+        isUsing: cdnAnalysis.hasCDN,
+        provider: cdnAnalysis.provider,
+        details: cdnAnalysis.details,
+        recommendations: cdnAnalysis.hasCDN ? [
+          'Otimizar cache de borda do CDN',
+          'Configurar compressão Brotli/Gzip no CDN',
+          'Implementar HTTP/3 para melhor performance',
+          'Configurar cache de assets com TTL adequado'
+        ] : [
           'Implementar CDN para distribuição global de conteúdo',
           'Configurar cache de borda otimizado',
           'Utilizar compressão Brotli/Gzip',
-          'Implementar HTTP/3 para melhor performance'
+          'Implementar HTTP/3 para melhor performance',
+          'Considerar CloudFlare, AWS CloudFront ou Fastly'
         ]
       },
       images: {
@@ -132,11 +148,12 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
   const analyzePerformance = async () => {
     setIsAnalyzing(true);
     console.log(`Iniciando análise de performance para: ${url}`);
+    console.log('Executando análise CDN via CDNPlanet...');
     
-    // Simula análise de IA
+    // Simula análise de IA com integração CDN real
     await new Promise(resolve => setTimeout(resolve, 4000));
     
-    const mockAnalysis = generateMockAnalysis();
+    const mockAnalysis = await generateMockAnalysis(url);
     setAnalysis(mockAnalysis);
     setIsAnalyzing(false);
     
@@ -186,11 +203,11 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
           <div className="text-center py-6">
             <Alert>
               <Info className="h-4 w-4" />
-              <AlertTitle>Análise de Performance com IA</AlertTitle>
+              <AlertTitle>Análise de Performance com IA + CDNPlanet</AlertTitle>
               <AlertDescription className="mt-2">
-                Nossa IA irá analisar o conteúdo do site, verificar regras de cache, 
-                uso de CDN, otimização de imagens e fornecer recomendações personalizadas 
-                para melhorar a performance.
+                Nossa IA irá analisar o conteúdo do site, verificar regras de cache usando 
+                CDNPlanet.com para detecção de CDN, otimização de imagens e fornecer 
+                recomendações personalizadas para melhorar a performance.
               </AlertDescription>
             </Alert>
             <Button onClick={analyzePerformance} className="mt-4" size="lg">
@@ -205,7 +222,7 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
             <div className="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
             <h3 className="text-lg font-semibold text-gray-700">Analisando Performance</h3>
             <p className="text-gray-600 mt-2">
-              IA processando conteúdo, cache, CDN e otimizações...
+              IA processando conteúdo, verificando CDN via CDNPlanet.com...
             </p>
             <div className="flex justify-center mt-4 space-x-1">
               <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
@@ -279,25 +296,44 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
                 </AccordionContent>
               </AccordionItem>
 
-              {/* CDN */}
+              {/* CDN - Atualizado */}
               <AccordionItem value="cdn">
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center space-x-3">
                     <Globe className="w-5 h-5 text-green-600" />
-                    <span>CDN (Content Delivery Network)</span>
+                    <span>CDN (via CDNPlanet.com)</span>
                     {getStatusIcon(analysis.cdn.isUsing)}
                     {!analysis.cdn.isUsing && getPriorityBadge('high')}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-4 pt-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Status do CDN</h4>
-                      <p className={`text-sm ${analysis.cdn.isUsing ? 'text-green-600' : 'text-red-600'}`}>
-                        {analysis.cdn.isUsing ? 
-                          `CDN ativo ${analysis.cdn.provider ? `(${analysis.cdn.provider})` : ''}` : 
-                          'CDN não detectado'}
+                    <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                      <p className="text-xs text-blue-700 mb-2">
+                        <strong>Análise via CDNPlanet.com:</strong> {analysis.cdn.details.analysis_method}
                       </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-medium mb-2">Status do CDN</h4>
+                          <p className={`text-sm ${analysis.cdn.isUsing ? 'text-green-600' : 'text-red-600'}`}>
+                            {analysis.cdn.isUsing ? 
+                              `CDN detectado: ${analysis.cdn.provider}` : 
+                              'CDN não detectado'}
+                          </p>
+                          {analysis.cdn.details.cdn_domains.length > 0 && (
+                            <div className="mt-2">
+                              <p className="text-xs text-gray-600">Domínios CDN:</p>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {analysis.cdn.details.cdn_domains.map((domain, idx) => (
+                                  <Badge key={idx} variant="outline" className="text-xs">
+                                    {domain}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Recomendações</h4>
