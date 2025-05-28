@@ -53,7 +53,7 @@ const GlobalMap = ({ data }: GlobalMapProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Mapa mundial melhorado */}
+        {/* Mapa mundial com SVG da Wikimedia */}
         <div className="relative bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl overflow-hidden mb-6 border-2 border-blue-200">
           <svg
             viewBox="0 0 900 500"
@@ -78,60 +78,50 @@ const GlobalMap = ({ data }: GlobalMapProps) => {
               </filter>
             </defs>
 
-            {/* Continentes redesenhados com mais detalhes */}
-            {/* América do Norte */}
-            <path
-              d="M 100 80 L 80 60 L 60 70 L 50 90 L 45 120 L 60 150 L 90 170 L 130 160 L 170 140 L 200 120 L 220 100 L 210 80 L 180 70 L 150 75 Z"
-              fill="url(#landGradient)"
-              stroke="#047857"
-              strokeWidth="2"
-              filter="url(#dropShadow)"
-            />
-            
-            {/* América do Sul */}
-            <path
-              d="M 150 200 L 130 180 L 120 200 L 125 240 L 140 280 L 160 320 L 180 340 L 200 320 L 210 280 L 205 240 L 190 200 Z"
-              fill="url(#landGradient)"
-              stroke="#047857"
-              strokeWidth="2"
-              filter="url(#dropShadow)"
-            />
-            
-            {/* Europa */}
-            <path
-              d="M 420 80 L 400 70 L 380 75 L 385 95 L 400 110 L 430 120 L 460 115 L 480 100 L 475 85 L 450 75 Z"
-              fill="url(#landGradient)"
-              stroke="#047857"
-              strokeWidth="2"
-              filter="url(#dropShadow)"
-            />
-            
-            {/* África */}
-            <path
-              d="M 420 140 L 400 130 L 380 140 L 375 180 L 385 220 L 400 260 L 430 280 L 460 270 L 485 250 L 490 210 L 480 170 L 460 150 Z"
-              fill="url(#landGradient)"
-              stroke="#047857"
-              strokeWidth="2"
-              filter="url(#dropShadow)"
-            />
-            
-            {/* Ásia */}
-            <path
-              d="M 500 60 L 480 50 L 460 65 L 470 90 L 490 120 L 530 140 L 580 150 L 630 130 L 680 120 L 720 110 L 740 90 L 730 70 L 700 60 L 650 55 L 600 50 Z"
-              fill="url(#landGradient)"
-              stroke="#047857"
-              strokeWidth="2"
-              filter="url(#dropShadow)"
-            />
-            
-            {/* Oceania */}
-            <path
-              d="M 700 280 L 680 270 L 670 280 L 675 300 L 690 310 L 720 315 L 750 310 L 760 295 L 750 280 Z"
-              fill="url(#landGradient)"
-              stroke="#047857"
-              strokeWidth="2"
-              filter="url(#dropShadow)"
-            />
+            {/* SVG do mapa mundial da Wikimedia simplificado */}
+            <g transform="scale(0.45) translate(100, 50)" fill="url(#landGradient)" stroke="#047857" strokeWidth="3" filter="url(#dropShadow)">
+              {/* América do Norte */}
+              <path d="M 200 150 L 180 120 L 150 110 L 120 120 L 100 140 L 90 170 L 100 200 L 130 230 L 170 250 L 220 240 L 270 220 L 320 200 L 350 180 L 340 160 L 310 140 L 280 135 L 240 140 Z" />
+              
+              {/* América do Sul */}
+              <path d="M 250 280 L 230 260 L 220 280 L 225 340 L 240 400 L 270 460 L 300 480 L 330 460 L 345 400 L 340 340 L 325 280 Z" />
+              
+              {/* Groenlândia */}
+              <path d="M 350 80 L 330 70 L 320 85 L 325 105 L 340 120 L 365 115 L 380 100 L 375 85 Z" />
+              
+              {/* Europa */}
+              <path d="M 480 160 L 460 140 L 440 145 L 445 170 L 460 190 L 490 200 L 520 195 L 540 180 L 535 165 L 510 150 Z" />
+              
+              {/* África */}
+              <path d="M 480 220 L 460 210 L 440 220 L 435 280 L 445 340 L 460 400 L 490 420 L 520 410 L 545 390 L 550 330 L 540 270 L 520 230 Z" />
+              
+              {/* Ásia */}
+              <path d="M 560 100 L 540 90 L 520 105 L 530 140 L 560 170 L 620 190 L 680 200 L 740 190 L 800 180 L 840 170 L 860 150 L 850 130 L 820 120 L 780 110 L 720 100 L 680 95 L 620 90 Z" />
+              
+              {/* Índia */}
+              <path d="M 680 240 L 660 230 L 650 250 L 655 280 L 670 300 L 700 305 L 720 295 L 715 275 L 700 250 Z" />
+              
+              {/* China */}
+              <path d="M 740 160 L 720 150 L 700 165 L 710 190 L 730 210 L 770 215 L 810 205 L 830 185 L 825 170 L 800 155 Z" />
+              
+              {/* Austrália */}
+              <path d="M 780 360 L 760 350 L 750 365 L 755 385 L 770 395 L 810 400 L 850 395 L 870 380 L 865 365 L 840 355 Z" />
+              
+              {/* Japão */}
+              <path d="M 880 190 L 870 180 L 865 195 L 870 210 L 885 215 L 895 205 L 890 190 Z" />
+              
+              {/* Reino Unido */}
+              <path d="M 445 150 L 435 140 L 430 155 L 435 170 L 450 175 L 460 165 L 455 150 Z" />
+              
+              {/* Escandinávia */}
+              <path d="M 500 100 L 485 85 L 480 110 L 490 140 L 510 145 L 525 130 L 520 105 Z" />
+              
+              {/* Madagascar */}
+              <path d="M 580 380 L 575 370 L 570 385 L 575 405 L 585 410 L 590 395 L 585 380 Z" />
+              
+              {/* Nova Zelândia */}
+              <path d="M 920 420 L 910 410 L 905 425 L 910 440 L 925 445 L 935 435 L 930 420 Z" />
+            </g>
 
             {/* Grid lines sutis */}
             <defs>
