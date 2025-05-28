@@ -1,1 +1,11 @@
+
 project_id = "jbkrndaekjrpskkwnjjw"
+
+[functions.analyze-website]
+verify_jwt = false
+
+[functions.cdn-analysis]
+verify_jwt = false
+
+[functions.vulnerability-test]
+verify_jwt = false

@@ -1,4 +1,6 @@
 
+import { RealAnalysisService } from './realAnalysisService';
+
 interface CDNAnalysisResult {
   hasCDN: boolean;
   provider: string | null;
@@ -11,19 +13,30 @@ interface CDNAnalysisResult {
 }
 
 export class CDNAnalyzer {
-  private static readonly CDN_FINDER_API = 'https://www.cdnplanet.com/api/cdnfinder';
-  
   static async analyzeCDN(url: string): Promise<CDNAnalysisResult> {
     try {
-      const domain = new URL(url).hostname;
+      console.log(`[CDNAnalyzer] Iniciando análise CDN real para: ${url}`);
       
-      // Simula análise usando o CDNPlanet (em produção, seria uma chamada real à API)
-      const mockAnalysis = this.generateMockCDNAnalysis(domain);
+      // Usa o serviço real através das edge functions
+      const realAnalysis = await RealAnalysisService.analyzeCDN(url);
       
-      console.log(`Análise CDN para ${domain}:`, mockAnalysis);
-      return mockAnalysis;
+      console.log('[CDNAnalyzer] Análise CDN real concluída:', realAnalysis);
+      
+      return {
+        hasCDN: realAnalysis.hasCDN,
+        provider: realAnalysis.provider,
+        details: {
+          detected: realAnalysis.details.detected,
+          cdn_name: realAnalysis.details.cdn_name,
+          cdn_domains: realAnalysis.details.cdn_domains,
+          analysis_method: realAnalysis.details.analysis_method,
+        }
+      };
+      
     } catch (error) {
-      console.error('Erro na análise CDN:', error);
+      console.error('[CDNAnalyzer] Erro na análise CDN:', error);
+      
+      // Fallback em caso de erro
       return {
         hasCDN: false,
         provider: null,
@@ -35,36 +48,5 @@ export class CDNAnalyzer {
         }
       };
     }
-  }
-
-  private static generateMockCDNAnalysis(domain: string): CDNAnalysisResult {
-    // Simula análise baseada em domínios conhecidos
-    const cdnProviders = ['CloudFlare', 'AWS CloudFront', 'Fastly', 'KeyCDN', 'MaxCDN', 'Akamai'];
-    const hasCDN = Math.random() > 0.4; // 60% chance de ter CDN
-    
-    if (hasCDN) {
-      const provider = cdnProviders[Math.floor(Math.random() * cdnProviders.length)];
-      return {
-        hasCDN: true,
-        provider,
-        details: {
-          detected: true,
-          cdn_name: provider,
-          cdn_domains: [`${domain}`, `cdn.${domain}`, `assets.${domain}`],
-          analysis_method: 'dns_cname_lookup'
-        }
-      };
-    }
-
-    return {
-      hasCDN: false,
-      provider: null,
-      details: {
-        detected: false,
-        cdn_name: null,
-        cdn_domains: [],
-        analysis_method: 'dns_analysis'
-      }
-    };
   }
 }
