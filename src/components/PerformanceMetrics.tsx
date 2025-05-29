@@ -14,22 +14,8 @@ interface PerformanceMetricsProps {
 }
 
 const PerformanceMetrics = ({ data }: PerformanceMetricsProps) => {
-  const getScoreClass = (score: number) => {
-    if (score >= 90) return 'performance-excellent';
-    if (score >= 70) return 'performance-good';
-    if (score >= 50) return 'performance-average';
-    return 'performance-poor';
-  };
-
-  const getScoreLabel = (score: number) => {
-    if (score >= 90) return 'Excelente';
-    if (score >= 70) return 'Bom';
-    if (score >= 50) return 'Regular';
-    return 'Precisa melhorar';
-  };
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
       <Card className="card-shadow">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Tempo de Carregamento</CardTitle>
@@ -40,6 +26,7 @@ const PerformanceMetrics = ({ data }: PerformanceMetricsProps) => {
           <p className="text-xs text-muted-foreground">
             {data.loadTime < 2 ? 'Muito rápido' : data.loadTime < 4 ? 'Razoável' : 'Lento'}
           </p>
+          <p className="text-xs text-blue-600 mt-1">Dados simulados de múltiplas localizações</p>
         </CardContent>
       </Card>
 
@@ -53,6 +40,7 @@ const PerformanceMetrics = ({ data }: PerformanceMetricsProps) => {
           <p className="text-xs text-muted-foreground">
             {data.pageSize < 1024 * 1024 ? 'Otimizado' : 'Pode ser otimizado'}
           </p>
+          <p className="text-xs text-orange-600 mt-1">Estimativa baseada em headers</p>
         </CardContent>
       </Card>
 
@@ -66,21 +54,7 @@ const PerformanceMetrics = ({ data }: PerformanceMetricsProps) => {
           <p className="text-xs text-muted-foreground">
             {data.requests < 50 ? 'Ótimo' : data.requests < 100 ? 'Bom' : 'Muitas requisições'}
           </p>
-        </CardContent>
-      </Card>
-
-      <Card className="card-shadow">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Score de Performance</CardTitle>
-          <Shield className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className={`text-2xl font-bold inline-block px-3 py-1 rounded-lg border ${getScoreClass(data.performanceScore)}`}>
-            {data.performanceScore}
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            {getScoreLabel(data.performanceScore)}
-          </p>
+          <p className="text-xs text-orange-600 mt-1">Estimativa (apenas HEAD request)</p>
         </CardContent>
       </Card>
     </div>

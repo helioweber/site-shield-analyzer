@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -6,12 +7,7 @@ import { Button } from '@/components/ui/button';
 import { 
   Zap, 
   Globe, 
-  Clock, 
-  Image, 
-  FileText, 
-  Settings, 
   TrendingUp,
-  AlertTriangle,
   CheckCircle,
   XCircle,
   Info,
@@ -21,8 +17,7 @@ import { useState } from 'react';
 import { CDNAnalyzer } from '@/services/cdnAnalyzer';
 import { RealAnalysisService } from '@/services/realAnalysisService';
 
-interface PerformanceAnalysis {
-  score: number;
+interface RealPerformanceAnalysis {
   realData: {
     compression: {
       gzip: boolean;
@@ -32,11 +27,11 @@ interface PerformanceAnalysis {
     };
     responseTime: number;
     server: string | null;
-  };
-  cacheRules: {
-    hasCache: boolean;
-    cacheHeaders: string[];
-    recommendations: string[];
+    statusCode: number;
+    protocol: string;
+    contentType: string;
+    contentLength: number;
+    headers: Record<string, string>;
   };
   cdn: {
     isUsing: boolean;
@@ -47,26 +42,6 @@ interface PerformanceAnalysis {
       cdn_domains: string[];
       analysis_method: string;
     };
-    recommendations: string[];
-  };
-  images: {
-    totalSize: number;
-    unoptimized: number;
-    recommendations: string[];
-  };
-  scripts: {
-    totalSize: number;
-    blocking: number;
-    recommendations: string[];
-  };
-  css: {
-    totalSize: number;
-    unused: number;
-    recommendations: string[];
-  };
-  serverResponse: {
-    ttfb: number;
-    recommendations: string[];
   };
 }
 
@@ -75,10 +50,10 @@ interface PerformanceRecommendationsProps {
 }
 
 const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) => {
-  const [analysis, setAnalysis] = useState<PerformanceAnalysis | null>(null);
+  const [analysis, setAnalysis] = useState<RealPerformanceAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const generateAnalysisWithRealData = async (url: string): Promise<PerformanceAnalysis> => {
+  const generateRealAnalysis = async (url: string): Promise<RealPerformanceAnalysis> => {
     // Análise real de CDN e servidor
     const [cdnAnalysis, serverAnalysis] = await Promise.all([
       CDNAnalyzer.analyzeCDN(url),
@@ -86,109 +61,39 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
     ]);
     
     return {
-      score: Math.floor(Math.random() * 40) + 45, // Simulado
       realData: {
         compression: serverAnalysis.performance.compression,
         responseTime: serverAnalysis.performance.responseTime,
         server: serverAnalysis.server.server,
-      },
-      cacheRules: {
-        hasCache: Math.random() > 0.4, // Simulado
-        cacheHeaders: ['Cache-Control', 'ETag', 'Expires'].filter(() => Math.random() > 0.3),
-        recommendations: [
-          'Configurar Cache-Control adequado para recursos estáticos',
-          'Implementar versionamento de assets',
-          'Utilizar ETag para validação de cache',
-          'Definir TTL apropriado para diferentes tipos de conteúdo'
-        ]
+        statusCode: serverAnalysis.server.statusCode,
+        protocol: serverAnalysis.server.protocol,
+        contentType: serverAnalysis.server.contentType,
+        contentLength: serverAnalysis.server.contentLength,
+        headers: serverAnalysis.server.headers,
       },
       cdn: {
-        isUsing: cdnAnalysis.hasCDN, // Real
-        provider: cdnAnalysis.provider, // Real
-        details: cdnAnalysis.details, // Real
-        recommendations: cdnAnalysis.hasCDN ? [
-          'Otimizar cache de borda do CDN',
-          'Configurar compressão Brotli/Gzip no CDN',
-          'Implementar HTTP/3 para melhor performance',
-          'Configurar cache de assets com TTL adequado'
-        ] : [
-          'Implementar CDN para distribuição global de conteúdo',
-          'Configurar cache de borda otimizado',
-          'Utilizar compressão Brotli/Gzip',
-          'Implementar HTTP/3 para melhor performance',
-          'Considerar CloudFlare, AWS CloudFront ou Fastly'
-        ]
-      },
-      images: {
-        totalSize: Math.floor(Math.random() * 5000) + 1000, // Simulado
-        unoptimized: Math.floor(Math.random() * 15) + 5, // Simulado
-        recommendations: [
-          'Converter imagens para formatos modernos (WebP, AVIF)',
-          'Implementar lazy loading para imagens',
-          'Utilizar responsive images com srcset',
-          'Comprimir imagens sem perda de qualidade significativa',
-          'Implementar blur placeholder durante carregamento'
-        ]
-      },
-      scripts: {
-        totalSize: Math.floor(Math.random() * 2000) + 500, // Simulado
-        blocking: Math.floor(Math.random() * 8) + 2, // Simulado
-        recommendations: [
-          'Minificar e comprimir arquivos JavaScript',
-          'Implementar code splitting e lazy loading',
-          'Remover JavaScript não utilizado',
-          'Mover scripts não críticos para async/defer',
-          'Utilizar tree shaking para reduzir bundle size'
-        ]
-      },
-      css: {
-        totalSize: Math.floor(Math.random() * 500) + 100, // Simulado
-        unused: Math.floor(Math.random() * 40) + 10, // Simulado
-        recommendations: [
-          'Remover CSS não utilizado',
-          'Minificar arquivos CSS',
-          'Utilizar CSS crítico inline',
-          'Implementar purgeCSS em builds de produção',
-          'Otimizar seletores CSS complexos'
-        ]
-      },
-      serverResponse: {
-        ttfb: serverAnalysis.performance.responseTime, // Real
-        recommendations: [
-          'Otimizar queries de banco de dados',
-          'Implementar cache de aplicação (Redis/Memcached)',
-          'Utilizar CDN para reduzir latência',
-          'Otimizar configuração do servidor web',
-          'Considerar implementar SSR/SSG quando apropriado'
-        ]
+        isUsing: cdnAnalysis.hasCDN,
+        provider: cdnAnalysis.provider,
+        details: cdnAnalysis.details,
       }
     };
   };
 
   const analyzePerformance = async () => {
     setIsAnalyzing(true);
-    console.log(`Iniciando análise de performance para: ${url}`);
-    console.log('Executando análise CDN via CDNPlanet e análise de compressão...');
+    console.log(`Iniciando análise REAL de performance para: ${url}`);
+    console.log('Coletando dados reais: CDN, compressão, headers do servidor...');
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 4000));
-      const analysisWithRealData = await generateAnalysisWithRealData(url);
-      setAnalysis(analysisWithRealData);
-      console.log('Análise de performance concluída:', analysisWithRealData);
+      const realAnalysis = await generateRealAnalysis(url);
+      setAnalysis(realAnalysis);
+      console.log('Análise REAL de performance concluída:', realAnalysis);
     } catch (error) {
       console.error('Erro na análise:', error);
-      // Fallback com dados simulados
-      const fallbackAnalysis = await generateAnalysisWithRealData(url);
-      setAnalysis(fallbackAnalysis);
+      throw error;
     } finally {
       setIsAnalyzing(false);
     }
-  };
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
   };
 
   const getStatusIcon = (condition: boolean) => {
@@ -199,20 +104,11 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
     );
   };
 
-  const getPriorityBadge = (priority: 'high' | 'medium' | 'low') => {
-    const variants = {
-      high: 'destructive',
-      medium: 'outline',
-      low: 'secondary'
-    } as const;
-    
-    const labels = {
-      high: 'Alta',
-      medium: 'Média',
-      low: 'Baixa'
-    };
-
-    return <Badge variant={variants[priority]}>{labels[priority]}</Badge>;
+  const getResponseTimeStatus = (responseTime: number) => {
+    if (responseTime < 300) return { color: 'text-green-600', label: 'Excelente' };
+    if (responseTime < 600) return { color: 'text-yellow-600', label: 'Bom' };
+    if (responseTime < 1000) return { color: 'text-orange-600', label: 'Regular' };
+    return { color: 'text-red-600', label: 'Lento' };
   };
 
   return (
@@ -220,7 +116,7 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <TrendingUp className="w-5 h-5 text-blue-600" />
-          <span>Análise de Performance & Recomendações</span>
+          <span>Análise de Performance - Dados Reais</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -228,16 +124,16 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
           <div className="text-center py-6">
             <Alert>
               <Info className="h-4 w-4" />
-              <AlertTitle>Análise Híbrida: Dados Reais + IA</AlertTitle>
+              <AlertTitle>Análise com Dados 100% Reais</AlertTitle>
               <AlertDescription className="mt-2">
-                <strong>Dados Reais:</strong> CDN (via CDNPlanet.com), compressão GZIP/Brotli, tempo de resposta do servidor
+                <strong>Dados Coletados:</strong> CDN (via CDNPlanet.com), compressão GZIP/Brotli, tempo de resposta real do servidor, headers HTTP, status codes
                 <br />
-                <strong>Dados Simulados:</strong> Métricas de otimização de assets, cache rules, JavaScript/CSS análise
+                <strong>Sem simulações:</strong> Todos os dados são coletados diretamente do servidor de destino
               </AlertDescription>
             </Alert>
             <Button onClick={analyzePerformance} className="mt-4" size="lg">
               <Zap className="w-4 h-4 mr-2" />
-              Iniciar Análise de Performance
+              Iniciar Análise Real
             </Button>
           </div>
         )}
@@ -245,9 +141,9 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
         {isAnalyzing && (
           <div className="text-center py-8">
             <div className="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-            <h3 className="text-lg font-semibold text-gray-700">Analisando Performance</h3>
+            <h3 className="text-lg font-semibold text-gray-700">Coletando Dados Reais</h3>
             <p className="text-gray-600 mt-2">
-              Coletando dados reais: CDN, compressão, headers do servidor...
+              Fazendo requisições HTTP para o servidor de destino...
             </p>
             <div className="flex justify-center mt-4 space-x-1">
               <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
@@ -259,65 +155,48 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
 
         {analysis && (
           <div className="space-y-6">
-            {/* Score Geral com indicação de dados reais */}
-            <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">Score de Performance</h3>
-              <div className={`text-4xl font-bold ${getScoreColor(analysis.score)}`}>
-                {analysis.score}/100
-              </div>
-              <p className="text-gray-600 mt-2">
-                {analysis.score >= 80 ? 'Excelente performance!' : 
-                 analysis.score >= 60 ? 'Boa performance, mas há melhorias possíveis' :
-                 'Performance precisa de otimizações significativas'}
-              </p>
-              <Badge variant="outline" className="mt-2">Score simulado baseado em métricas reais</Badge>
-            </div>
-
             {/* Dados Reais do Servidor */}
             <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
               <h4 className="font-medium text-green-800 mb-3 flex items-center space-x-2">
                 <CheckCircle className="w-5 h-5" />
-                <span>Dados Reais do Servidor</span>
+                <span>Dados Reais Coletados do Servidor</span>
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <strong>Servidor:</strong> {analysis.realData.server || 'Não identificado'}
                 </div>
+                <div className="flex items-center space-x-2">
+                  <strong>Status:</strong> 
+                  <Badge variant={analysis.realData.statusCode === 200 ? 'default' : 'destructive'}>
+                    {analysis.realData.statusCode}
+                  </Badge>
+                </div>
                 <div>
-                  <strong>Tempo de Resposta:</strong> {analysis.realData.responseTime}ms
+                  <strong>Protocolo:</strong> {analysis.realData.protocol}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Archive className="w-4 h-4" />
-                  <strong>Compressão GZIP:</strong> 
-                  <span className={analysis.realData.compression.gzip ? 'text-green-600' : 'text-red-600'}>
-                    {analysis.realData.compression.gzip ? 'Ativado' : 'Não detectado'}
-                  </span>
+                <div>
+                  <strong>Content-Type:</strong> {analysis.realData.contentType}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Archive className="w-4 h-4" />
-                  <strong>Compressão Brotli:</strong> 
-                  <span className={analysis.realData.compression.brotli ? 'text-green-600' : 'text-red-600'}>
-                    {analysis.realData.compression.brotli ? 'Ativado' : 'Não detectado'}
-                  </span>
+                <div className={`font-medium ${getResponseTimeStatus(analysis.realData.responseTime).color}`}>
+                  <strong>Tempo de Resposta:</strong> {analysis.realData.responseTime}ms 
+                  ({getResponseTimeStatus(analysis.realData.responseTime).label})
+                </div>
+                <div>
+                  <strong>Tamanho:</strong> {analysis.realData.contentLength > 0 ? `${(analysis.realData.contentLength / 1024).toFixed(1)}KB` : 'Não informado'}
                 </div>
               </div>
-              {analysis.realData.compression.contentEncoding && (
-                <div className="mt-2 text-xs text-gray-600">
-                  <strong>Content-Encoding:</strong> {analysis.realData.compression.contentEncoding}
-                </div>
-              )}
             </div>
 
-            {/* Análises Detalhadas */}
+            {/* Análises Detalhadas - Apenas Dados Reais */}
             <Accordion type="single" collapsible className="space-y-2">
-              {/* Compressão - Nova seção */}
+              {/* Compressão - Dados Reais */}
               <AccordionItem value="compression">
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center space-x-3">
                     <Archive className="w-5 h-5 text-purple-600" />
                     <span>Compressão (Dados Reais)</span>
                     {getStatusIcon(analysis.realData.compression.gzip || analysis.realData.compression.brotli)}
-                    <Badge variant="secondary" className="text-xs">REAL</Badge>
+                    <Badge variant="default" className="text-xs bg-green-600">REAL</Badge>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
@@ -325,36 +204,41 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="text-center p-3 bg-gray-50 rounded">
                         <p className={`text-lg font-bold ${analysis.realData.compression.gzip ? 'text-green-600' : 'text-red-600'}`}>
-                          {analysis.realData.compression.gzip ? 'Sim' : 'Não'}
+                          {analysis.realData.compression.gzip ? 'Ativo' : 'Inativo'}
                         </p>
                         <p className="text-xs text-gray-600">GZIP</p>
                       </div>
                       <div className="text-center p-3 bg-gray-50 rounded">
                         <p className={`text-lg font-bold ${analysis.realData.compression.brotli ? 'text-green-600' : 'text-red-600'}`}>
-                          {analysis.realData.compression.brotli ? 'Sim' : 'Não'}
+                          {analysis.realData.compression.brotli ? 'Ativo' : 'Inativo'}
                         </p>
                         <p className="text-xs text-gray-600">Brotli</p>
                       </div>
                       <div className="text-center p-3 bg-gray-50 rounded">
                         <p className={`text-lg font-bold ${analysis.realData.compression.deflate ? 'text-green-600' : 'text-red-600'}`}>
-                          {analysis.realData.compression.deflate ? 'Sim' : 'Não'}
+                          {analysis.realData.compression.deflate ? 'Ativo' : 'Inativo'}
                         </p>
                         <p className="text-xs text-gray-600">Deflate</p>
                       </div>
                     </div>
+                    {analysis.realData.compression.contentEncoding && (
+                      <div className="mt-2 text-xs text-gray-600">
+                        <strong>Content-Encoding detectado:</strong> {analysis.realData.compression.contentEncoding}
+                      </div>
+                    )}
                     <div>
-                      <h4 className="font-medium mb-2">Recomendações de Compressão</h4>
+                      <h4 className="font-medium mb-2">Recomendações baseadas nos dados reais</h4>
                       <ul className="space-y-1">
-                        {!analysis.realData.compression.gzip && (
+                        {!analysis.realData.compression.gzip && !analysis.realData.compression.brotli && (
                           <li className="text-sm text-gray-700 flex items-start space-x-2">
                             <span className="text-red-600 mt-1">•</span>
-                            <span>Ativar compressão GZIP no servidor para reduzir tamanho de arquivos em até 70%</span>
+                            <span>Nenhuma compressão detectada. Ativar GZIP ou Brotli pode reduzir o tamanho em até 70%</span>
                           </li>
                         )}
-                        {!analysis.realData.compression.brotli && (
+                        {!analysis.realData.compression.brotli && analysis.realData.compression.gzip && (
                           <li className="text-sm text-gray-700 flex items-start space-x-2">
                             <span className="text-blue-600 mt-1">•</span>
-                            <span>Implementar compressão Brotli para melhor performance que GZIP</span>
+                            <span>GZIP ativo, mas Brotli oferece melhor compressão (10-15% adicional)</span>
                           </li>
                         )}
                         {(analysis.realData.compression.gzip || analysis.realData.compression.brotli) && (
@@ -369,53 +253,6 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
                 </AccordionContent>
               </AccordionItem>
 
-              {/* Cache */}
-              <AccordionItem value="cache">
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center space-x-3">
-                    <Clock className="w-5 h-5 text-purple-600" />
-                    <span>Regras de Cache</span>
-                    {getStatusIcon(analysis.cacheRules.hasCache)}
-                    <Badge variant="outline" className="text-xs">SIMULADO</Badge>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-4 pt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="font-medium mb-2">Status do Cache</h4>
-                        <p className={`text-sm ${analysis.cacheRules.hasCache ? 'text-green-600' : 'text-red-600'}`}>
-                          {analysis.cacheRules.hasCache ? 'Cache configurado' : 'Cache não encontrado'}
-                        </p>
-                        {analysis.cacheRules.cacheHeaders.length > 0 && (
-                          <div className="mt-2">
-                            <p className="text-xs text-gray-600">Headers encontrados:</p>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {analysis.cacheRules.cacheHeaders.map((header, idx) => (
-                                <Badge key={idx} variant="secondary" className="text-xs">
-                                  {header}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Recomendações</h4>
-                      <ul className="space-y-1">
-                        {analysis.cacheRules.recommendations.map((rec, idx) => (
-                          <li key={idx} className="text-sm text-gray-700 flex items-start space-x-2">
-                            <span className="text-blue-600 mt-1">•</span>
-                            <span>{rec}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
               {/* CDN - Dados Reais */}
               <AccordionItem value="cdn">
                 <AccordionTrigger className="hover:no-underline">
@@ -423,7 +260,7 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
                     <Globe className="w-5 h-5 text-green-600" />
                     <span>CDN (via CDNPlanet.com)</span>
                     {getStatusIcon(analysis.cdn.isUsing)}
-                    <Badge variant="secondary" className="text-xs">REAL</Badge>
+                    <Badge variant="default" className="text-xs bg-green-600">REAL</Badge>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
@@ -442,7 +279,7 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
                           </p>
                           {analysis.cdn.details.cdn_domains.length > 0 && (
                             <div className="mt-2">
-                              <p className="text-xs text-gray-600">Domínios CDN:</p>
+                              <p className="text-xs text-gray-600">Domínios CDN detectados:</p>
                               <div className="flex flex-wrap gap-1 mt-1">
                                 {analysis.cdn.details.cdn_domains.map((domain, idx) => (
                                   <Badge key={idx} variant="outline" className="text-xs">
@@ -456,160 +293,73 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
                       </div>
                     </div>
                     <div>
-                      <h4 className="font-medium mb-2">Recomendações</h4>
+                      <h4 className="font-medium mb-2">Recomendações baseadas nos dados reais</h4>
                       <ul className="space-y-1">
-                        {analysis.cdn.recommendations.map((rec, idx) => (
-                          <li key={idx} className="text-sm text-gray-700 flex items-start space-x-2">
-                            <span className="text-green-600 mt-1">•</span>
-                            <span>{rec}</span>
-                          </li>
-                        ))}
+                        {analysis.cdn.isUsing ? (
+                          <>
+                            <li className="text-sm text-green-700 flex items-start space-x-2">
+                              <span className="text-green-600 mt-1">•</span>
+                              <span>CDN detectado! Excelente para performance global ✅</span>
+                            </li>
+                            <li className="text-sm text-gray-700 flex items-start space-x-2">
+                              <span className="text-blue-600 mt-1">•</span>
+                              <span>Verificar configuração de cache do CDN para otimização adicional</span>
+                            </li>
+                          </>
+                        ) : (
+                          <>
+                            <li className="text-sm text-gray-700 flex items-start space-x-2">
+                              <span className="text-red-600 mt-1">•</span>
+                              <span>Implementar CDN para melhorar performance global</span>
+                            </li>
+                            <li className="text-sm text-gray-700 flex items-start space-x-2">
+                              <span className="text-blue-600 mt-1">•</span>
+                              <span>Considerar CloudFlare, AWS CloudFront ou Fastly</span>
+                            </li>
+                          </>
+                        )}
                       </ul>
                     </div>
                   </div>
                 </AccordionContent>
               </AccordionItem>
 
-              {/* Imagens */}
-              <AccordionItem value="images">
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center space-x-3">
-                    <Image className="w-5 h-5 text-orange-600" />
-                    <span>Otimização de Imagens</span>
-                    {analysis.images.unoptimized > 10 && getPriorityBadge('medium')}
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-4 pt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="text-center p-3 bg-gray-50 rounded">
-                        <p className="text-lg font-bold text-orange-600">{(analysis.images.totalSize / 1024).toFixed(1)}KB</p>
-                        <p className="text-xs text-gray-600">Tamanho Total</p>
-                      </div>
-                      <div className="text-center p-3 bg-gray-50 rounded">
-                        <p className="text-lg font-bold text-red-600">{analysis.images.unoptimized}</p>
-                        <p className="text-xs text-gray-600">Não Otimizadas</p>
-                      </div>
-                      <div className="text-center p-3 bg-gray-50 rounded">
-                        <p className="text-lg font-bold text-green-600">{Math.round(((100 - analysis.images.unoptimized) / 100) * 100)}%</p>
-                        <p className="text-xs text-gray-600">Otimização</p>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Recomendações</h4>
-                      <ul className="space-y-1">
-                        {analysis.images.recommendations.map((rec, idx) => (
-                          <li key={idx} className="text-sm text-gray-700 flex items-start space-x-2">
-                            <span className="text-orange-600 mt-1">•</span>
-                            <span>{rec}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* JavaScript */}
-              <AccordionItem value="scripts">
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center space-x-3">
-                    <FileText className="w-5 h-5 text-yellow-600" />
-                    <span>Otimização JavaScript</span>
-                    {analysis.scripts.blocking > 5 && getPriorityBadge('medium')}
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-4 pt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-gray-50 rounded">
-                        <p className="text-lg font-bold text-yellow-600">{(analysis.scripts.totalSize / 1024).toFixed(1)}KB</p>
-                        <p className="text-xs text-gray-600">Tamanho JS</p>
-                      </div>
-                      <div className="text-center p-3 bg-gray-50 rounded">
-                        <p className="text-lg font-bold text-red-600">{analysis.scripts.blocking}</p>
-                        <p className="text-xs text-gray-600">Scripts Bloqueantes</p>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Recomendações</h4>
-                      <ul className="space-y-1">
-                        {analysis.scripts.recommendations.map((rec, idx) => (
-                          <li key={idx} className="text-sm text-gray-700 flex items-start space-x-2">
-                            <span className="text-yellow-600 mt-1">•</span>
-                            <span>{rec}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* CSS */}
-              <AccordionItem value="css">
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center space-x-3">
-                    <Settings className="w-5 h-5 text-blue-600" />
-                    <span>Otimização CSS</span>
-                    {analysis.css.unused > 30 && getPriorityBadge('low')}
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-4 pt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-gray-50 rounded">
-                        <p className="text-lg font-bold text-blue-600">{analysis.css.totalSize}KB</p>
-                        <p className="text-xs text-gray-600">Tamanho CSS</p>
-                      </div>
-                      <div className="text-center p-3 bg-gray-50 rounded">
-                        <p className="text-lg font-bold text-red-600">{analysis.css.unused}%</p>
-                        <p className="text-xs text-gray-600">CSS Não Usado</p>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Recomendações</h4>
-                      <ul className="space-y-1">
-                        {analysis.css.recommendations.map((rec, idx) => (
-                          <li key={idx} className="text-sm text-gray-700 flex items-start space-x-2">
-                            <span className="text-blue-600 mt-1">•</span>
-                            <span>{rec}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Server Response */}
-              <AccordionItem value="server">
+              {/* Headers de Segurança */}
+              <AccordionItem value="headers">
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center space-x-3">
                     <Zap className="w-5 h-5 text-purple-600" />
-                    <span>Resposta do Servidor</span>
-                    {analysis.serverResponse.ttfb > 600 && getPriorityBadge('high')}
+                    <span>Headers HTTP (Dados Reais)</span>
+                    <Badge variant="default" className="text-xs bg-green-600">REAL</Badge>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-4 pt-4">
-                    <div className="text-center p-4 bg-gray-50 rounded">
-                      <p className="text-2xl font-bold text-purple-600">{analysis.serverResponse.ttfb}ms</p>
-                      <p className="text-sm text-gray-600">Time to First Byte (TTFB)</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {analysis.serverResponse.ttfb < 300 ? 'Excelente' : 
-                         analysis.serverResponse.ttfb < 600 ? 'Bom' : 'Precisa melhorar'}
-                      </p>
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <h4 className="font-medium mb-2">Headers detectados</h4>
+                      <div className="space-y-1 text-xs">
+                        {Object.entries(analysis.realData.headers).slice(0, 10).map(([key, value]) => (
+                          <div key={key} className="flex">
+                            <span className="font-mono text-blue-600 w-32 flex-shrink-0">{key}:</span>
+                            <span className="font-mono text-gray-700 break-all">{value}</span>
+                          </div>
+                        ))}
+                        {Object.keys(analysis.realData.headers).length > 10 && (
+                          <p className="text-gray-500 italic">... e mais {Object.keys(analysis.realData.headers).length - 10} headers</p>
+                        )}
+                      </div>
                     </div>
                     <div>
-                      <h4 className="font-medium mb-2">Recomendações</h4>
+                      <h4 className="font-medium mb-2">Análise dos headers</h4>
                       <ul className="space-y-1">
-                        {analysis.serverResponse.recommendations.map((rec, idx) => (
-                          <li key={idx} className="text-sm text-gray-700 flex items-start space-x-2">
-                            <span className="text-purple-600 mt-1">•</span>
-                            <span>{rec}</span>
-                          </li>
-                        ))}
+                        <li className="text-sm text-gray-700 flex items-start space-x-2">
+                          <span className="text-blue-600 mt-1">•</span>
+                          <span>Total de {Object.keys(analysis.realData.headers).length} headers HTTP detectados</span>
+                        </li>
+                        <li className="text-sm text-gray-700 flex items-start space-x-2">
+                          <span className="text-purple-600 mt-1">•</span>
+                          <span>Headers de segurança e cache podem ser analisados individualmente</span>
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -621,7 +371,7 @@ const PerformanceRecommendations = ({ url }: PerformanceRecommendationsProps) =>
             <div className="text-center pt-4 border-t">
               <Button onClick={analyzePerformance} variant="outline">
                 <TrendingUp className="w-4 h-4 mr-2" />
-                Executar Nova Análise
+                Executar Nova Análise Real
               </Button>
             </div>
           </div>
