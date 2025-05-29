@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 interface RealServerAnalysis {
@@ -11,6 +12,12 @@ interface RealServerAnalysis {
   contentType: string;
   contentLength: number;
   remoteAddress: string | null;
+  compression: {
+    gzip: boolean;
+    brotli: boolean;
+    deflate: boolean;
+    contentEncoding: string | null;
+  };
 }
 
 interface RealSecurityHeaders {
@@ -28,6 +35,12 @@ interface RealWebsiteAnalysis {
     loadTime: number;
     pageSize: number;
     responseTime: number;
+    compression: {
+      gzip: boolean;
+      brotli: boolean;
+      deflate: boolean;
+      contentEncoding: string | null;
+    };
   };
 }
 

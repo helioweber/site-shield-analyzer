@@ -18,6 +18,12 @@ interface ServerAnalysis {
   contentType: string;
   contentLength: number;
   remoteAddress: string | null;
+  compression: {
+    gzip: boolean;
+    brotli: boolean;
+    deflate: boolean;
+    contentEncoding: string | null;
+  };
 }
 
 interface SecurityHeaders {
@@ -35,6 +41,12 @@ async function analyzeWebsite(url: string): Promise<{
     loadTime: number;
     pageSize: number;
     responseTime: number;
+    compression: {
+      gzip: boolean;
+      brotli: boolean;
+      deflate: boolean;
+      contentEncoding: string | null;
+    };
   };
 }> {
   const startTime = Date.now();
@@ -42,14 +54,14 @@ async function analyzeWebsite(url: string): Promise<{
   try {
     console.log(`Analisando website: ${url}`);
     
-    // Faz requisição real para o website
+    // Faz requisição real para o website com headers que aceitam compressão
     const response = await fetch(url, {
-      method: 'HEAD', // Usar HEAD para obter headers sem baixar conteúdo completo
+      method: 'HEAD',
       headers: {
         'User-Agent': 'WebSec-Analyzer/1.0 (Security Scanner)',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Encoding': 'gzip, deflate, br', // Solicita compressão
         'Connection': 'keep-alive',
         'Upgrade-Insecure-Requests': '1',
       },
@@ -66,7 +78,17 @@ async function analyzeWebsite(url: string): Promise<{
     console.log(`Resposta recebida em ${responseTime}ms:`, {
       status: response.status,
       headers: Object.keys(headers),
+      contentEncoding: headers['content-encoding'],
     });
+
+    // Análise de compressão
+    const contentEncoding = headers['content-encoding'] || null;
+    const compression = {
+      gzip: contentEncoding?.includes('gzip') || false,
+      brotli: contentEncoding?.includes('br') || false,
+      deflate: contentEncoding?.includes('deflate') || false,
+      contentEncoding,
+    };
 
     // Análise do servidor
     const serverAnalysis: ServerAnalysis = {
@@ -80,6 +102,7 @@ async function analyzeWebsite(url: string): Promise<{
       contentType: headers['content-type'] || 'unknown',
       contentLength: parseInt(headers['content-length'] || '0'),
       remoteAddress: headers['x-forwarded-for'] || headers['x-real-ip'] || null,
+      compression,
     };
 
     // Análise de segurança dos headers
@@ -96,6 +119,7 @@ async function analyzeWebsite(url: string): Promise<{
       loadTime: responseTime / 1000, // Converter para segundos
       pageSize: serverAnalysis.contentLength,
       responseTime,
+      compression, // Inclui dados de compressão na performance
     };
 
     return {
@@ -150,6 +174,7 @@ serve(async (req) => {
       server: analysis.server.server,
       security: analysis.security,
       responseTime: analysis.performance.responseTime,
+      compression: analysis.performance.compression,
     });
 
     return new Response(
