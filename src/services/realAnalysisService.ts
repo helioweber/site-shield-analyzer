@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 interface RealServerAnalysis {
@@ -124,8 +123,8 @@ export class RealAnalysisService {
     }
   }
 
-  static async testVulnerability(url: string, testType: 'xss' | 'security_headers'): Promise<RealVulnerabilityResult> {
-    console.log(`[RealAnalysisService] Iniciando teste de vulnerabilidade: ${testType} para ${url}`);
+  static async testVulnerability(url: string, testType: 'xss' | 'sql_injection' | 'rfi' | 'security_headers'): Promise<RealVulnerabilityResult> {
+    console.log(`[RealAnalysisService] Iniciando teste OWASP: ${testType} para ${url}`);
     
     try {
       const { data, error } = await supabase.functions.invoke('vulnerability-test', {
@@ -141,7 +140,7 @@ export class RealAnalysisService {
         throw new Error(data.error || 'Falha no teste de vulnerabilidade');
       }
 
-      console.log('[RealAnalysisService] Teste concluído:', data.result);
+      console.log('[RealAnalysisService] Teste OWASP concluído:', data.result);
       return data.result;
 
     } catch (error) {
