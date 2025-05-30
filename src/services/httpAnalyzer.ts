@@ -17,7 +17,7 @@ interface ServerResponse {
 export class HttpAnalyzer {
   static async analyzeServer(url: string): Promise<ServerResponse> {
     try {
-      console.log(`[HttpAnalyzer] Iniciando análise real do servidor: ${url}`);
+      console.log(`[HttpAnalyzer] Iniciando análise real do servidor com GET: ${url}`);
       
       // Usa o serviço real através das edge functions
       const realAnalysis = await RealAnalysisService.analyzeWebsite(url);

@@ -1,8 +1,8 @@
+
 import { useState } from 'react';
 import { Shield } from 'lucide-react';
 import Header from '@/components/Header';
 import URLInput from '@/components/URLInput';
-import PerformanceMetrics from '@/components/PerformanceMetrics';
 import SecurityAnalysis from '@/components/SecurityAnalysis';
 import GlobalMap from '@/components/GlobalMap';
 import PDFExporter from '@/components/PDFExporter';
@@ -53,17 +53,10 @@ const generateMockData = (url: string) => {
   });
 
   const avgLoadTime = locationData.reduce((acc, loc) => acc + loc.loadTime, 0) / locationData.length;
-  const performanceScore = Math.max(0, Math.round(100 - (avgLoadTime * 20)));
 
   return {
-    performance: {
-      loadTime: parseFloat(avgLoadTime.toFixed(1)),
-      pageSize: Math.floor(Math.random() * 3000000) + 500000,
-      requests: Math.floor(Math.random() * 80) + 20,
-      performanceScore,
-    },
     security: {
-      overall: performanceScore > 80 ? 'excellent' : performanceScore > 60 ? 'good' : performanceScore > 40 ? 'warning' : 'critical' as 'excellent' | 'good' | 'warning' | 'critical',
+      overall: avgLoadTime < 2 ? 'excellent' : avgLoadTime < 3 ? 'good' : avgLoadTime < 4 ? 'warning' : 'critical' as 'excellent' | 'good' | 'warning' | 'critical',
       https: Math.random() > 0.2,
       headers: {
         hsts: Math.random() > 0.3,
@@ -143,8 +136,6 @@ const Index = () => {
                   <PDFExporter analysisData={analysisData} url={analyzedUrl} />
                 </div>
               </div>
-              
-              <PerformanceMetrics data={analysisData.performance} />
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <SecurityAnalysis data={analysisData.security} url={analyzedUrl} />

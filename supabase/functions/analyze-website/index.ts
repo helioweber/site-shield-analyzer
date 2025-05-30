@@ -54,9 +54,9 @@ async function analyzeWebsite(url: string): Promise<{
   try {
     console.log(`Analisando website: ${url}`);
     
-    // Faz requisição real para o website com headers que aceitam compressão
+    // Faz requisição real para o website com headers que aceitam compressão usando GET
     const response = await fetch(url, {
-      method: 'HEAD',
+      method: 'GET',
       headers: {
         'User-Agent': 'WebSec-Analyzer/1.0 (Security Scanner)',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
